@@ -1,0 +1,6 @@
+# Excluye las dependencias instaladas localmente.
+node_modules/
+# Evita guardar credenciales y configuración privada.
+.env
+# Excluye archivos de registro generados por npm.
+npm-debug.log*
