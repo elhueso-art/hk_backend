@@ -16,7 +16,7 @@ const producteSchema = new mongoose.Schema( // Define la ficha principal de cada
     { // Declara los campos de catálogo.
         nom: { type: String, required: true, trim: true, minlength: 2, maxlength: 100 }, // Guarda el nombre del producto.
         descripcio: { type: String, trim: true, maxlength: 1000, default: '' }, // Guarda su descripción.
-        categoria: { type: String, required: true, enum: ['pastissos', 'cupcakes', 'galetes', 'brioixeria', 'postres', 'altres'] }, // Limita el producto a categorías de pastelería.
+        category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true }, // Relaciona el producto con una categoría guardada en MongoDB.
         preu: { // Define el precio base del producto.
             type: Number, // Guarda el precio como número.
             required: true, // Exige un precio.
@@ -55,8 +55,8 @@ const producteSchema = new mongoose.Schema( // Define la ficha principal de cada
 ); // Termina el esquema del producto.
 
 producteSchema.index({ nom: 1 }); // Acelera búsquedas por nombre.
-producteSchema.index({ categoria: 1, actiu: 1 }); // Acelera filtros por categoría y disponibilidad.
+producteSchema.index({ category: 1, actiu: 1 }); // Acelera filtros por categoría y disponibilidad.
 producteSchema.index({ destacat: 1, actiu: 1 }); // Acelera la lista de productos destacados.
 producteSchema.index({ nom: 'text', descripcio: 'text', sabors: 'text', farcits: 'text' }); // Permite buscar por texto en el catálogo.
 
-module.exports = mongoose.model('Producte', producteSchema); // Exporta el modelo para el resto de la API.
+module.exports = mongoose.model('Product', producteSchema, 'productes'); // Exporta Product y conserva la colección existente.

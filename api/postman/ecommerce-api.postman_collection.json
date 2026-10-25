@@ -1,0 +1,405 @@
+{
+  "info": {
+    "_postman_id": "5fc4bc11-cf51-4abf-b56c-323520f215c7",
+    "name": "Ecommerce API",
+    "description": "CRUD local de productos, categorías y usuarios ficticios para la tienda de pasteles.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "categoryId", "value": "" },
+    { "key": "categorySlug", "value": "" },
+    { "key": "productOneId", "value": "" },
+    { "key": "productTwoId", "value": "" },
+    { "key": "userId", "value": "" },
+    { "key": "userEmail", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "POST - categoría correcta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Response is JSON', () => pm.response.to.be.json);",
+                  "if (pm.response.code === 201) {",
+                  "  const category = pm.response.json().data;",
+                  "  pm.collectionVariables.set('categoryId', category._id);",
+                  "  pm.collectionVariables.set('categorySlug', category.slug);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Pasteles Postman\",\n  \"slug\": \"pasteles-postman-{{$timestamp}}\",\n  \"description\": \"Categoría ficticia para verificar relaciones de pastelería\",\n  \"active\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/categories"
+          }
+        },
+        {
+          "name": "POST - categoría sin nombre",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Response is JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"slug\": \"categoria-sin-nombre-{{$timestamp}}\",\n  \"description\": \"Prueba de validación\",\n  \"active\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/categories"
+          }
+        },
+        {
+          "name": "POST - slug duplicado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 409', () => pm.response.to.have.status(409));",
+                  "pm.test('Response is JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Otra categoría de pasteles\",\n  \"slug\": \"{{categorySlug}}\",\n  \"description\": \"Debe producir conflicto por slug duplicado\",\n  \"active\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/categories"
+          }
+        },
+        {
+          "name": "GET - listar categorías",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response is JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/categories" }
+        },
+        {
+          "name": "GET - consultar categoría",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/categories/{{categoryId}}" }
+        },
+        {
+          "name": "PUT - modificar categoría",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response is JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Pasteles Postman actualizados\",\n  \"slug\": \"{{categorySlug}}\",\n  \"description\": \"Categoría de prueba modificada\",\n  \"active\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/categories/{{categoryId}}"
+          }
+        },
+        {
+          "name": "DELETE - eliminar categoría temporal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status code is 204', () => pm.response.to.have.status(204));"]
+              }
+            }
+          ],
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/categories/{{categoryId}}" }
+        },
+        {
+          "name": "POST - crear categoría para los pasteles",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) {",
+                  "  const category = pm.response.json().data;",
+                  "  pm.collectionVariables.set('categoryId', category._id);",
+                  "  pm.collectionVariables.set('categorySlug', category.slug);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Pasteles para productos Postman\",\n  \"slug\": \"pasteles-productos-{{$timestamp}}\",\n  \"description\": \"Categoría usada por los dos productos de prueba\",\n  \"active\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/categories"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "GET - listar productos",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/products" }
+        },
+        {
+          "name": "POST - crear pastel de chocolate",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Response is JSON', () => pm.response.to.be.json);",
+                  "if (pm.response.code === 201) pm.collectionVariables.set('productOneId', pm.response.json().data._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Pastel de chocolate Postman\",\n  \"descripcio\": \"Bizcocho de chocolate con ganache\",\n  \"category\": \"{{categoryId}}\",\n  \"preu\": 30,\n  \"sabors\": [\"chocolate\"],\n  \"porcions\": 8,\n  \"sotaComanda\": true,\n  \"diesPreparacio\": 2\n}"
+            },
+            "url": "{{baseUrl}}/api/products"
+          }
+        },
+        {
+          "name": "POST - crear pastel de vainilla",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) pm.collectionVariables.set('productTwoId', pm.response.json().data._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Pastel de vainilla Postman\",\n  \"descripcio\": \"Pastel de vainilla personalizable\",\n  \"category\": \"{{categoryId}}\",\n  \"preu\": 28,\n  \"sabors\": [\"vainilla\"],\n  \"porcions\": 6,\n  \"personalitzable\": true,\n  \"sotaComanda\": true,\n  \"diesPreparacio\": 2\n}"
+            },
+            "url": "{{baseUrl}}/api/products"
+          }
+        },
+        {
+          "name": "GET - consultar producto",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/products/{{productOneId}}" }
+        },
+        {
+          "name": "PUT - modificar producto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status code is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Pastel de chocolate Postman actualizado\",\n  \"descripcio\": \"Bizcocho de chocolate con ganache\",\n  \"category\": \"{{categoryId}}\",\n  \"preu\": 32,\n  \"sabors\": [\"chocolate\"],\n  \"porcions\": 8,\n  \"sotaComanda\": true,\n  \"diesPreparacio\": 2\n}"
+            },
+            "url": "{{baseUrl}}/api/products/{{productOneId}}"
+          }
+        },
+        {
+          "name": "GET - comprobar category con populate",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const products = pm.response.json().data;",
+                  "pm.test('Devuelve al menos dos pasteles', () => pm.expect(products.length).to.be.at.least(2));",
+                  "pm.test('Cada pastel incluye la categoría poblada', () => products.forEach((product) => {",
+                  "  pm.expect(product.category).to.have.property('name');",
+                  "  pm.expect(product.category).to.have.property('slug');",
+                  "}));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/products?category={{categoryId}}"
+          }
+        },
+        {
+          "name": "DELETE - eliminar pastel de chocolate",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/products/{{productOneId}}" }
+        },
+        {
+          "name": "DELETE - eliminar pastel de vainilla",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/products/{{productTwoId}}" }
+        },
+        {
+          "name": "DELETE - eliminar categoría temporal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Status code is 204', () => pm.response.to.have.status(204));"]
+              }
+            }
+          ],
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/categories/{{categoryId}}" }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "POST - usuario correcto sin passwordHash en respuesta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Response is JSON', () => pm.response.to.be.json);",
+                  "if (pm.response.code === 201) {",
+                  "  const user = pm.response.json().data;",
+                  "  pm.collectionVariables.set('userId', user._id);",
+                  "  pm.collectionVariables.set('userEmail', user.email);",
+                  "}",
+                  "pm.test('No expone passwordHash', () => pm.expect(pm.response.json().data).not.to.have.property('passwordHash'));",
+                  "pm.test('Asigna el rol client', () => pm.expect(pm.response.json().data.role).to.eql('client'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cliente ficticio Postman\",\n  \"email\": \"cliente-{{$guid}}@example.test\",\n  \"password\": \"Pastel-Prueba-2026-Local\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users"
+          }
+        },
+        {
+          "name": "POST - email duplicado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 409', () => pm.response.to.have.status(409));",
+                  "pm.test('Response is JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cliente duplicado\",\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"Pastel-Prueba-2026-Local\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users"
+          }
+        },
+        {
+          "name": "GET - listar usuarios",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/users" }
+        },
+        {
+          "name": "GET - consultar usuario",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/users/{{userId}}" }
+        },
+        {
+          "name": "PUT - modificar usuario",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Cliente ficticio actualizado\"\n}" },
+            "url": "{{baseUrl}}/api/users/{{userId}}"
+          }
+        },
+        {
+          "name": "DELETE - baja lógica del usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('El usuario queda desactivado', () => pm.expect(pm.response.json().data.active).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/users/{{userId}}" }
+        }
+      ]
+    }
+  ]
+}

@@ -1,8 +1,7 @@
 const productService = require('../services/productService'); // Importa las operaciones de producto.
 
 const respondWithError = (res, error) => { // Convierte errores internos en respuestas HTTP.
-    const statusCode = // Prepara el código HTTP según el tipo de error.
-        error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500; // Distingue datos inválidos de errores internos.
+    const statusCode = error.statusCode || (error.code === 11000 ? 409 : error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500); // Traduce duplicados, validaciones y errores internos.
 
     if (statusCode === 500) console.error(error); // Registra los errores inesperados en el servidor.
 
@@ -35,7 +34,7 @@ const isObjectBody = (body) => // Comprueba que el cuerpo de la petición sea un
 const listProducts = async (req, res) => { // Atiende la consulta del catálogo.
     try { // Captura errores de consulta.
         const result = await productService.getProducts({ // Pide los productos con los filtros recibidos.
-            categoria: typeof req.query.categoria === 'string' ? req.query.categoria : undefined, // Lee la categoría si es texto.
+            category: typeof req.query.category === 'string' ? req.query.category : undefined, // Lee el identificador de categoría.
             q: typeof req.query.q === 'string' ? req.query.q.trim() : undefined, // Limpia el texto de búsqueda.
             actiu: parseBoolean(req.query.actiu) ?? true, // Muestra productos activos salvo que se indique otra cosa.
             destacat: parseBoolean(req.query.destacat), // Aplica el filtro de destacados.

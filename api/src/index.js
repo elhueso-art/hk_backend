@@ -3,6 +3,9 @@ require('dotenv').config(); // Carga las variables del archivo .env.
 const express = require('express'); // Carga Express para crear la API.
 const connectDB = require('./config/db'); // Importa la conexión con MongoDB.
 const productRoutes = require('./routes/productRoutes'); // Importa las rutas del catálogo.
+const categoryRoutes = require('./routes/categoryRoutes'); // Importa las rutas de categorías.
+const userRoutes = require('./routes/userRoutes'); // Importa las rutas locales de usuarios.
+const localOnly = require('./middleware/localOnly'); // Importa la restricción de acceso local.
 
 const app = express(); // Crea la aplicación HTTP.
 app.disable('x-powered-by'); // Oculta el encabezado que identifica Express.
@@ -15,6 +18,8 @@ app.get('/health', (req, res) => // Define una ruta sencilla de estado.
     res.json({ status: 'success', database: 'connected' }) // Confirma que el servidor y la base están activos.
 ); // Termina la ruta de estado.
 app.use('/api/products', productRoutes); // Conecta las rutas del catálogo bajo /api/products.
+app.use('/api/categories', categoryRoutes); // Conecta el CRUD de categorías.
+app.use('/api/users', localOnly, userRoutes); // Restringe el CRUD de usuarios a desarrollo local.
 
 app.use((req, res) => // Captura cualquier ruta que no esté definida.
     res.status(404).json({ status: 'error', message: 'Ruta no trobada' }) // Devuelve un error de ruta inexistente.

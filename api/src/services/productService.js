@@ -3,7 +3,7 @@ const Product = require('../models/producte'); // Importa el modelo de producto 
 const getProducts = async (filters = {}) => { // Busca productos aplicando filtros opcionales.
     const query = {}; // Prepara el filtro que recibirá MongoDB.
 
-    if (filters.categoria) query.categoria = filters.categoria; // Filtra por categoría cuando se indica.
+    if (filters.category) query.category = filters.category; // Filtra por categoría cuando se indica.
     if (filters.actiu !== undefined) query.actiu = filters.actiu; // Filtra productos activos o inactivos.
     if (filters.destacat !== undefined) query.destacat = filters.destacat; // Filtra productos destacados.
 
@@ -16,7 +16,7 @@ const getProducts = async (filters = {}) => { // Busca productos aplicando filtr
     const page = Math.max(1, filters.page || 1); // Garantiza que la página sea al menos la primera.
     const limit = Math.min(100, Math.max(1, filters.limit || 20)); // Limita cada página a un máximo de cien productos.
     const [products, total] = await Promise.all([ // Consulta productos y total al mismo tiempo.
-        Product.find(query) // Busca los productos que cumplen el filtro.
+        Product.find(query).populate('category') // Busca productos y carga sus categorías relacionadas.
             .sort({ destacat: -1, createdAt: -1 }) // Ordena primero los destacados y luego los recientes.
             .skip((page - 1) * limit) // Salta los productos de páginas anteriores.
             .limit(limit), // Limita la cantidad devuelta.
@@ -26,14 +26,14 @@ const getProducts = async (filters = {}) => { // Busca productos aplicando filtr
     return { products, total, page, limit }; // Devuelve productos y datos de paginación.
 }; // Termina la búsqueda de productos.
 
-const getProductById = async (id) => Product.findById(id); // Busca un producto por su identificador.
-const createProduct = async (productData) => Product.create(productData); // Valida y guarda un producto nuevo.
+const getProductById = async (id) => Product.findById(id).populate('category'); // Busca un producto y carga su categoría.
+const createProduct = async (productData) => Product.create(productData).then((product) => product.populate('category')); // Guarda el producto y carga su categoría.
 
 const updateProduct = async (id, productData) => // Define la actualización parcial de un producto.
     Product.findByIdAndUpdate(id, productData, { // Busca el producto y aplica los cambios.
         new: true, // Devuelve el documento actualizado.
         runValidators: true // Valida los campos modificados.
-    }); // Termina la actualización.
+    }).populate('category'); // Devuelve el producto con su categoría relacionada.
 
 const deleteProduct = async (id) => Product.findByIdAndDelete(id); // Elimina el producto indicado.
 
